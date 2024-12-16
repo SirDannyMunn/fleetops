@@ -4,6 +4,7 @@ namespace Fleetbase\FleetOps\Http\Resources\v1;
 
 use Fleetbase\Http\Resources\FleetbaseResource;
 use Fleetbase\Support\Http;
+use Fleetbase\FleetOps\Http\Resources\v1\Order;
 
 class ServiceArea extends FleetbaseResource
 {
@@ -25,11 +26,12 @@ class ServiceArea extends FleetbaseResource
             'center'     => $this->location,
             'border'     => $this->border,
             'zones'      => $this->whenLoaded('zones', fn () => Zone::collection($this->zones)),
+            'orders'     => $this->whenLoaded('orders', fn () => Order::collection($this->orders)),
             'status'     => $this->status,
             'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,
         ];
-    }
+    }    
 
     /**
      * Transform the resource into an webhook payload.

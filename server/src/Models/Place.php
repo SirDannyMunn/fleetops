@@ -883,4 +883,24 @@ class Place extends Model
     {
         return $this->getAddressString();
     }
+
+    /**
+     * Find the closest service area that contains this place's location
+     * 
+     * @return ServiceArea|null The service area containing this place's location, or null if none found
+     */
+    public function closestServiceArea()
+    {
+        // Get all service areas
+        $serviceAreas = ServiceArea::where('company_uuid', $this->company_uuid)->get();
+
+        // Loop through service areas and check if point is within borders
+        foreach ($serviceAreas as $serviceArea) {
+            if ($serviceArea->includesPoint2($this->location)) {
+                return $serviceArea;
+            }
+        }
+
+        return null;
+    }
 }

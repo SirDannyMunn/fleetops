@@ -22,7 +22,7 @@ class ServiceAreaController extends Controller
      * @return \Fleetbase\Http\Resources\ServiceArea
      */
     public function create(CreateServiceAreaRequest $request)
-    {
+    {        
         // get request input
         $input = $request->only(['name', 'type', 'status']);
 

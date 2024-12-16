@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -174,6 +175,7 @@ class Order extends Model
         'qr_code',
         'created_by_name',
         'updated_by_name',
+        'status_group',
     ];
 
     /**
@@ -1347,7 +1349,7 @@ class Order extends Model
         $flow     = $this->config()->nextActivity();
         $activity = null;
 
-        if (count($flow) === 1 && $code === null) {
+        if (count(value: $flow) === 1 && $code === null) {
             $activity = $flow[0];
         }
 
@@ -1681,7 +1683,7 @@ class Order extends Model
     public function getConfigFlow(): array
     {
         $orderConfig = $this->config();
-        if (is_array($orderConfig->flow)) {
+        if (is_array(value: $orderConfig->flow)) {
             return $orderConfig->flow;
         }
 
@@ -1774,4 +1776,85 @@ class Order extends Model
 
         return false;
     }
+
+    // public function serviceAreas()
+    // {
+    //     return $this->belongsToMany(ServiceArea::class, 'service_area_orders');
+    // }
+
+    public function deliveryRoute()
+    {
+        return $this->hasOne(DeliveryRoute::class, 'uuid', 'delivery_route_uuid');
+    }
+
+    public function posOrder()
+    {
+        return $this->hasOne(PosOrder::class, 'uuid', 'pos_order_uuid');
+    }
+
+    public function scopeWithRelations($query, $relations)
+    {
+        if (in_array('posOrder', $relations)) {
+            $query->with('posOrder');
+        }
+        // ... handle other relations
+    }
+
+    /**
+     * Get the status group based on the order status
+     * 
+     * @return string
+     */
+    public function getStatusGroupAttribute(): string
+    {
+        $inDepotStatuses = [
+            // 'dropped_at_depot',
+            'order_collected',
+            'ready_for_dispatch',
+        ];
+        
+        $inTransitStatuses = [
+            'created',
+            'started',
+            'dispatched',
+            'en_route_to_dropoff',
+            'en_route_to_collection',
+        ];
+
+        if (in_array($this->status, $inDepotStatuses)) {
+            return 'depot_tasks';
+        }
+
+        if (in_array($this->status, $inTransitStatuses)) {
+            return 'driving_tasks';
+        }
+
+        if (in_array($this->status, ['completed', 'canceled'])) {
+            return 'completed';
+        }
+
+        return 'other';
+    }
+
+
+    protected static function booted()
+    {
+        static::saving(function ($order) {
+            if ($order->isDirty('status')) {
+                // Get tenant ID from order's company
+                $tenantId = $order->company->tenant_id;
+                
+                if ($tenantId) {
+                    // Query POS orders using tenant ID from order's company
+                    $posOrder = PosOrder::forTenant($tenantId)->find($order->meta['laundryos_order_id']);
+                    if ($posOrder) {
+                        // $posOrder->status = $order->status;
+                        // $posOrder->save();
+                        Log::info('POS order status updated', ['pos_order' => $posOrder->toArray()]);
+                    }
+                }
+            }
+        });
+    }
 }
+

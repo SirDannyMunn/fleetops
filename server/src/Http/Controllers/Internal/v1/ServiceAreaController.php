@@ -4,6 +4,7 @@ namespace Fleetbase\FleetOps\Http\Controllers\Internal\v1;
 
 use Fleetbase\FleetOps\Exports\ServiceAreaExport;
 use Fleetbase\FleetOps\Http\Controllers\FleetOpsController;
+use Fleetbase\FleetOps\Models\Place;
 use Fleetbase\Http\Requests\ExportRequest;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -29,5 +30,15 @@ class ServiceAreaController extends FleetOpsController
         $fileName     = trim(Str::slug('service-areas-' . date('Y-m-d-H:i')) . '.' . $format);
 
         return Excel::download(new ServiceAreaExport($selections), $fileName);
+    }
+
+    
+    public function checkAddress($id)
+    {
+        $place = Place::firstWhere("public_id", $id);
+
+        return response()->json([
+            "service_area" => $place->closestServiceArea()
+        ]);
     }
 }

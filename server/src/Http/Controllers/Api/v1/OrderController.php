@@ -33,6 +33,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\OrderRouting\OrderRoutingService;
 
 class OrderController extends Controller
 {
@@ -218,6 +219,9 @@ class OrderController extends Controller
                 if (is_array($customer)) {
                     $input['customer_uuid'] = Utils::get($customer, 'uuid');
                     $input['customer_type'] = Utils::getModelClassName(Utils::get($customer, 'table'));
+                } else {
+                    $input['customer_uuid'] = $customer;
+                    $input['customer_type'] = 'contact';
                 }
             } elseif (is_array($customer)) {
                 // create customer from input
@@ -476,6 +480,12 @@ class OrderController extends Controller
     {
         $results = Order::queryWithRequest($request, function (&$query, $request) {
             $query->where('company_uuid', session('company'));
+
+            // Add filter for completed orders if filterCompleted=true
+            // if ($request->boolean('filterCompleted')) {
+                $query->whereNotIn('status', ['completed', 'dropped_at_depot']);
+            // }
+
             if ($request->has('payload')) {
                 $query->whereHas('payload', function ($q) use ($request) {
                     $q->where('public_id', $request->input('payload'));
@@ -534,6 +544,12 @@ class OrderController extends Controller
                     } else {
                         $q->where('code', $request->input('entity_status'));
                     }
+                });
+            }
+
+            if ($request->has('delivery_route')) {
+                $query->whereHas('deliveryRoute', function ($q) use ($request) {
+                    $q->where('public_id', $request->input('delivery_route'));
                 });
             }
 
@@ -624,7 +640,13 @@ class OrderController extends Controller
             }
         });
 
-        return OrderResource::collection($results);
+        if ($request->has('sort_by_route')) {
+            $orders = resolve(OrderRoutingService::class)->sortOrdersByRoute($results);
+        }
+
+        $orders = OrderResource::collection($results);
+
+        return $orders;
     }
 
     /**

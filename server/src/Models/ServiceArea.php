@@ -425,4 +425,54 @@ class ServiceArea extends Model
 
         return true;
     }
+
+    /**
+ * Checks if a given point is included within the border.
+ *
+ * @param Point $point the point to check
+ *
+ * @return bool returns true if the point is inside the polygon, false otherwise
+ */
+public function includesPoint2(Point $point): bool
+{
+    if (!$this->border) {
+        return false;
+    }
+
+    // Convert the point to a coordinate for the Geotools library
+    $coordinate = new \League\Geotools\Coordinate\Coordinate([
+        $point->getLat(),
+        $point->getLng()
+    ]);
+
+    // Convert each polygon in the multipolygon and check if point is in any of them
+    foreach ($this->border as $polygon) {
+        $coordinates = [];
+        foreach ($polygon[0] as $point) { // Get first line string of polygon
+            $coordinates[] = [$point->getLat(), $point->getLng()];
+        }
+
+        if (empty($coordinates)) {
+            continue;
+        }
+
+        $geoPolygon = new \League\Geotools\Polygon\Polygon($coordinates);
+        if ($geoPolygon->pointInPolygon($coordinate)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class, 'service_area_orders');
+    }
+
+    public function deliveryRoutes()
+    {
+        return $this->hasMany(DeliveryRoute::class, 'service_area_uuid', 'uuid');
+    }
 }

@@ -6,6 +6,7 @@ use Fleetbase\Casts\Json;
 use Fleetbase\Models\Model;
 use Fleetbase\Traits\HasUuid;
 use Fleetbase\Traits\TracksApiCredential;
+use Illuminate\Support\Str;
 
 class Route extends Model
 {
@@ -124,5 +125,14 @@ class Route extends Model
     public function getOrderDispatchedAtAttribute()
     {
         return data_get($this, 'order.dispatched_at');
+    }
+
+    
+    public function getPluralName() {
+        return $this->table;
+    }
+
+    public function getSingularName() {
+        return Str::singular($this->table);
     }
 }

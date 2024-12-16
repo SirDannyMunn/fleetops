@@ -57,6 +57,10 @@ class Order extends FleetbaseResource
             'files'                    => $this->when(Http::isInternalRequest(), $this->files, File::collection($this->files)),
             'purchase_rate'            => new PurchaseRate($this->purchaseRate),
             'notes'                    => $this->notes,
+            // 'collection_note'          => $this->collection_note,
+            // random value to test ["depot_tasks", "driving_tasks"] it should be one of them. the value shoul dbe a string
+            // 'status_group'             => array_rand(['depot_tasks', 'driving_tasks']),
+            'status_group'             => $this->getStatusGroupAttribute(),
             ...$this->getCustomFieldValues(),
             'type'                  => $this->type,
             'status'                => $this->status,
