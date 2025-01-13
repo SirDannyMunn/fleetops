@@ -35,7 +35,7 @@ class ServiceAreaController extends FleetOpsController
     
     public function checkAddress($id)
     {
-        $place = Place::firstWhere("public_id", $id);
+        $place = Place::with("deliveryRoute")->firstWhere("public_id", $id);
 
         return response()->json([
             "service_area" => $place->closestServiceArea()
