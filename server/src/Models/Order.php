@@ -2,6 +2,7 @@
 
 namespace Fleetbase\FleetOps\Models;
 
+use App\Models\DeliveryRouteOrder;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Fleetbase\Casts\Json;
 use Fleetbase\Casts\PolymorphicType;
@@ -1836,6 +1837,19 @@ class Order extends Model
         return 'other';
     }
 
+    /**
+     * Attach this order to a delivery route
+     * 
+     * @param string $deliveryRouteUuid
+     * @return \App\Models\DeliveryRouteOrder
+     */
+    public function attachToDeliveryRoute(string $deliveryRouteUuid)
+    {
+        return DeliveryRouteOrder::create([
+            'delivery_route_uuid' => $deliveryRouteUuid,
+            'order_uuid' => $this->uuid
+        ]);
+    }
 
     protected static function booted()
     {

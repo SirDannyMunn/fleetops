@@ -29,21 +29,21 @@ Route::prefix(config('fleetops.api.routing.prefix', null))->namespace('Fleetbase
     function ($router) {
 
 
-        /* This is using Internal API middleware and route config, but using APi controller. 
-         * This is the one which works, although maybe I should switch the front end to simply
-         * use the public API endpoint. */
-        Route::prefix('int/v1')
-            ->middleware(['fleetbase.api', Fleetbase\FleetOps\Http\Middleware\TransformLocationMiddleware::class])
-            ->namespace('Api\v1')
-            ->group(function ($router) {
-                $router->group(['prefix' => 'delivery-routes'], function () use ($router) {
-                    $router->post('/', 'DeliveryRouteController@create');
-                    $router->get('/', 'DeliveryRouteController@query');
-                    $router->get('{id}', 'DeliveryRouteController@find');
-                    $router->put('{id}', 'DeliveryRouteController@update');
-                    $router->delete('{id}', 'DeliveryRouteController@delete');
-                });
-            });
+        // /* This is using Internal API middleware and route config, but using APi controller. 
+        //  * This is the one which works, although maybe I should switch the front end to simply
+        //  * use the public API endpoint. */
+        // Route::prefix('int/v1')
+        //     ->middleware(['fleetbase.api', Fleetbase\FleetOps\Http\Middleware\TransformLocationMiddleware::class])
+        //     ->namespace('Api\v1')
+        //     ->group(function ($router) {
+        //         $router->group(['prefix' => 'delivery-routes'], function () use ($router) {
+        //             $router->post('/', 'DeliveryRouteController@create');
+        //             $router->get('/', 'DeliveryRouteController@query');
+        //             $router->get('{id}', 'DeliveryRouteController@find');
+        //             $router->put('{id}', 'DeliveryRouteController@update');
+        //             $router->delete('{id}', 'DeliveryRouteController@delete');
+        //         });
+        //     });
 
         /*
         |--------------------------------------------------------------------------
