@@ -28,6 +28,7 @@ return new class() extends Migration {
             $table->date('start_date')->nullable(); // For non-recurring routes
             $table->date('end_date')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
