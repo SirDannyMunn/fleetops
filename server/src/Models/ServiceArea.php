@@ -466,10 +466,10 @@ public function includesPoint2(Point $point): bool
 }
 
 
-    public function orders()
-    {
-        return $this->belongsToMany(Order::class, 'service_area_orders');
-    }
+    // public function orders()
+    // {
+    //     return $this->belongsToMany(Order::class, 'service_area_orders');
+    // }
 
     public function deliveryRoutes()
     {
