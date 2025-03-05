@@ -50,12 +50,6 @@ class OrderController extends Controller
         // get request input
         $input = $request->only(['internal_id', 'payload', 'service_quote', 'purchase_rate', 'adhoc', 'adhoc_distance', 'pod_method', 'pod_required', 'scheduled_at', 'status', 'meta', 'notes']);
 
-        // return response()->apiError([
-        //     'company' => session('company'),
-        //     'user'    => Auth::user(),
-        //     'request' => $request->all(),
-        // ]);
-
         // Get order config
         $orderConfig = OrderConfig::resolveFromIdentifier($request->only(['type', 'order_config']));
         if (!$orderConfig) {
