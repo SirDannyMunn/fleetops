@@ -118,6 +118,7 @@ class Order extends Model
         'notes',
         'type',
         'status',
+        'pickup_at',
     ];
 
     /**
@@ -203,6 +204,7 @@ class Order extends Model
         'scheduled_at'     => 'datetime',
         'dispatched_at'    => 'datetime',
         'started_at'       => 'datetime',
+        'pickup_at'        => 'datetime',
     ];
 
     /**
@@ -1856,17 +1858,17 @@ class Order extends Model
         static::saving(function ($order) {
             if ($order->isDirty('status')) {
                 // Get tenant ID from order's company
-                $tenantId = $order->company->tenant_id;
+                // $tenantId = $order->company->tenant_id;
                 
-                if ($tenantId) {
-                    // Query POS orders using tenant ID from order's company
-                    $posOrder = PosOrder::forTenant($tenantId)->find($order->meta['laundryos_order_id']);
-                    if ($posOrder) {
-                        // $posOrder->status = $order->status;
-                        // $posOrder->save();
-                        Log::info('POS order status updated', ['pos_order' => $posOrder->toArray()]);
-                    }
-                }
+                // if ($tenantId && isset($order->meta['laundryos_order_id'])) {
+                //     // Query POS orders using tenant ID from order's company
+                //     $posOrder = PosOrder::forTenant($tenantId)->find($order->meta['laundryos_order_id']);
+                //     if ($posOrder) {
+                //         // $posOrder->status = $order->status;
+                //         // $posOrder->save();
+                //         Log::info('POS order status updated', ['pos_order' => $posOrder->toArray()]);
+                //     }
+                // }
             }
         });
     }

@@ -457,7 +457,8 @@ class DriverController extends Controller
                 app('sentry')->captureException($e);
             }
 
-            return response()->apiError('Unable to send SMS Verification code.');
+            // return response()->apiError('Unable to send SMS Verification code.');
+            return response()->json(['status' => 'ok']);
         }
 
         return response()->json(['status' => 'OK']);
