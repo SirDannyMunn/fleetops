@@ -35,6 +35,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Services\OrderRouting\OrderRoutingService;
+use App\Services\RouteOptimizationService;
 
 class OrderController extends Controller
 {
@@ -654,11 +655,20 @@ class OrderController extends Controller
             }
         });
 
+        $orders = OrderResource::collection($results);
+
         if ($request->has('sort_by_route')) {
-            $orders = resolve(OrderRoutingService::class)->sortOrdersByRoute($results);
+            $driver = Driver::where('public_id', $request->input('driver'))->get()->first();
+            $location = $driver->location;
+            $latitude = $location->getLat();
+            $longitude = $location->getLng();
+            // $sortedOrders = collect(resolve(RouteOptimizationService::class)->optimizeRoute("{$latitude}, {$longitude}", $results->toArray()));
+            $sortedOrders = collect(resolve(RouteOptimizationService::class)->optimizeRoute("37.7841502,-122.4834379", $results->toArray()));
+            $orders = $orders->sortBy(function ($order) use ($sortedOrders) {
+                return array_search($order->uuid, $sortedOrders['optimized_order_sequence']);
+            });
         }
 
-        $orders = OrderResource::collection($results);
 
         return $orders;
     }
